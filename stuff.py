@@ -1,7 +1,7 @@
 import pygame
 import random
 from settings import *
-from sprites import Player, Enemy, Missile
+from sprites import Player, Enemy, Missile, Blocks
 
 pygame.init()
 
@@ -12,9 +12,19 @@ clock = pygame.time.Clock()
 
 running = True
 ########################################################################################################################
+#################
+all_sprites = pygame.sprite.Group()
+#################
+# Player
 player_group = pygame.sprite.Group()                       # create a sprite group
-player = Player('assets/sprite_ship_3.png')                # create a player object
+player = Player('assets/player.png')                       # create a player object
 player_group.add(player)                                   # add player object to group
+all_sprites.add(player)
+# sounds
+fire_sound = pygame.mixer.Sound('assets/shoot.wav')
+# Missile
+missile_group = pygame.sprite.Group()
+
 ########################################################################################################################
 # game loop
 while running:
@@ -22,11 +32,20 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        if event.type == pygame.KEYDOWN:
+            if event.key is pygame.K_SPACE:
+                missile = Missile(player.rect.centerx - missile_width//2, player.rect.top)
+                missile_group.add(missile)
+                all_sprites.add(missile)
+                fire_sound.play()
 
-    screen.fill(WHITE)
+    # print(all_sprites)
+    screen.fill(BLACK)
+    missile_group.draw(screen)
     player_group.draw(screen)
-    player_group.update()
-
+    # player_group.update()
+    # missile_group.update()
+    all_sprites.update()
     pygame.display.flip()
 
     clock.tick(FPS)
