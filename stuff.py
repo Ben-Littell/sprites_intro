@@ -24,7 +24,8 @@ all_sprites.add(player)
 fire_sound = pygame.mixer.Sound('assets/shoot.wav')
 # Missile
 missile_group = pygame.sprite.Group()
-
+# Enemy
+# for numb in range(30):
 ########################################################################################################################
 # game loop
 while running:
@@ -45,6 +46,7 @@ while running:
     player_group.draw(screen)
     # player_group.update()
     # missile_group.update()
+
     all_sprites.update()
     pygame.display.flip()
 
