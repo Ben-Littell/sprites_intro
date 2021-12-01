@@ -25,7 +25,13 @@ fire_sound = pygame.mixer.Sound('assets/shoot.wav')
 # Missile
 missile_group = pygame.sprite.Group()
 # Enemy
-# for numb in range(30):
+Enemy_group = pygame.sprite.Group()
+for row in range(1, 8):
+    for numb in range(1, 11):
+        enemy = Enemy('assets/red (1) (1).png', 50 * numb, 40 * row)
+        Enemy_group.add(enemy)
+        all_sprites.add(enemy)
+
 ########################################################################################################################
 # game loop
 while running:
@@ -43,6 +49,7 @@ while running:
     # print(all_sprites)
     screen.fill(BLACK)
     missile_group.draw(screen)
+    Enemy_group.draw(screen)
     player_group.draw(screen)
     # player_group.update()
     # missile_group.update()
