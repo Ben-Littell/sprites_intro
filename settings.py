@@ -4,7 +4,8 @@ GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 BLACK = (0, 0, 0)
 COLORS = [RED, GREEN, BLUE, BLACK]
-
+x_spacing = 50
+y_spacing = 40
 WIDTH = 600
 HEIGHT = 900
 SIZE = (WIDTH, HEIGHT)

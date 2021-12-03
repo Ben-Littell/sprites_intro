@@ -26,9 +26,9 @@ fire_sound = pygame.mixer.Sound('assets/shoot.wav')
 missile_group = pygame.sprite.Group()
 # Enemy
 Enemy_group = pygame.sprite.Group()
-for row in range(1, 8):
+for row in range(1, 4):
     for numb in range(1, 11):
-        enemy = Enemy('assets/red (1) (1).png', 50 * numb, 40 * row)
+        enemy = Enemy('assets/red.png', x_spacing * numb, y_spacing * row, row)
         Enemy_group.add(enemy)
         all_sprites.add(enemy)
 
@@ -39,6 +39,7 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+
         if event.type == pygame.KEYDOWN:
             if event.key is pygame.K_SPACE:
                 missile = Missile(player.rect.centerx - missile_width//2, player.rect.top)
