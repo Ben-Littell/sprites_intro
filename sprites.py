@@ -43,8 +43,10 @@ class Enemy(pygame.sprite.Sprite):
     def update(self):
         self.rect.x += self.x_velo
         self.rect.y = (self.y_level + self.row) * y_spacing
-        if self.rect.right >= WIDTH or self.rect.left <= 0:
-            return True
+
+    def test(self):
+        print(self.x_velo)
+        print('Test Complete')
 
 
 class Missile(pygame.sprite.Sprite):
@@ -68,4 +70,4 @@ class Missile(pygame.sprite.Sprite):
 class Blocks(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.Surface(())
+        self.image = pygame.Surface((block_dimensions, block_dimensions))

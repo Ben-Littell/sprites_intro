@@ -6,6 +6,7 @@ BLACK = (0, 0, 0)
 COLORS = [RED, GREEN, BLUE, BLACK]
 x_spacing = 50
 y_spacing = 40
+enemy_border_check = False
 WIDTH = 600
 HEIGHT = 900
 SIZE = (WIDTH, HEIGHT)
