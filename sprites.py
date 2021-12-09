@@ -38,6 +38,9 @@ class Enemy(pygame.sprite.Sprite):
     def update(self, x_velo):
         self.rect.x += x_velo
 
+    def drop_missiles(self):
+        pass
+
 
 class Missile(pygame.sprite.Sprite):
     def __init__(self, x, y):
