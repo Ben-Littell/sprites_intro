@@ -37,6 +37,18 @@ for row in range(1, 7):
         enemy = Enemy('assets/red.png', x_pos, y_pos)
         Enemy_group.add(enemy)
 enemy_direction = 1
+# blocks
+block_group = pygame.sprite.Group()
+start_values = [100, 225, 350, 475]
+for start in start_values:
+    for row_index, row in enumerate(LAYOUT):
+        for col_index, col in enumerate(row):
+            if col == 'X':
+                x_position = col_index*block_width + start
+                y_position = row_index*block_height + 600
+                block = Blocks(x_position, y_position, screen)
+                block_group.add(block)
+                all_sprites.add(block)
 ########################################################################################################################
 # game loop
 while running:
@@ -58,6 +70,8 @@ while running:
     # print(all_sprites)
     enemy_kills = pygame.sprite.groupcollide(missile_group, Enemy_group, True, True)
     player_kills = pygame.sprite.groupcollide(player_group, Enemy_group, True, True)
+    enemy_blocks = pygame.sprite.groupcollide(Enemy_group, block_group, False, True)
+    missile_blocks = pygame.sprite.groupcollide(missile_group, block_group, True, True)
     if enemy_kills:
         enemy_killed.play()
     enemies = Enemy_group.sprites()
@@ -77,6 +91,7 @@ while running:
     missile_group.draw(screen)
     Enemy_group.draw(screen)
     player_group.draw(screen)
+    block_group.draw(screen)
 
     # missile_group.update()
     all_sprites.update()
