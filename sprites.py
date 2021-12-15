@@ -84,3 +84,26 @@ class EnemyMissiles(pygame.sprite.Sprite):
         if self.rect.top <= HEIGHT:
             self.kill()
 
+
+class EnemyExplosion(pygame.sprite.Sprite):
+    def __init__(self, center):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = explosion_list[0]
+        self.rect = self.image.get_rect()
+        self.rect.center = center
+        self.frame = 0
+        self.frame_rate = 50
+        self.kill_center = center
+        self.prev_update = pygame.time.get_ticks()
+
+    def update(self):
+        now = pygame.time.get_ticks()
+        if now - self.prev_update > self.frame_rate:
+            self.prev_update = now
+            self.frame += 1
+        if self.frame == len(explosion_list):
+            self.kill()
+        else:
+            self.image = explosion_list[self.frame]
+            self.rect = self.image.get_rect()
+            self.rect.center = self.kill_center

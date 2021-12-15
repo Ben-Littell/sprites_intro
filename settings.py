@@ -1,3 +1,6 @@
+import pygame
+pygame.init()
+
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
@@ -26,3 +29,14 @@ LAYOUT = ['  XXXXXXX',
           'XXX     XXX',
           'XX       XX']
 MISSILE_DELAY = 300
+# fonts
+sm_font = pygame.font.Font('assets/unifont.ttf', 32)
+med_font = pygame.font.Font('assets/unifont.ttf', 38)
+lg_font = pygame.font.Font('assets/unifont.ttf', 44)
+###################
+explosion_list = []
+for i in range(1, 5):
+    image_path = pygame.image.load(f'assets/explosion_{i}.png')
+    explosion_list.append(image_path)
+
+

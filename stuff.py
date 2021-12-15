@@ -1,7 +1,7 @@
 import pygame
 import random
 from settings import *
-from sprites import Player, Enemy, Missile, Blocks
+from sprites import Player, Enemy, Missile, Blocks, EnemyExplosion
 
 pygame.init()
 
@@ -49,6 +49,10 @@ for start in start_values:
                 block = Blocks(x_position, y_position, screen)
                 block_group.add(block)
                 all_sprites.add(block)
+# fonts
+score = 0
+# explosion group
+explosion_group = pygame.sprite.Group()
 ########################################################################################################################
 # game loop
 while running:
@@ -74,6 +78,11 @@ while running:
     missile_blocks = pygame.sprite.groupcollide(missile_group, block_group, True, True)
     if enemy_kills:
         enemy_killed.play()
+        score += 1
+        for hit in enemy_kills:
+            explosion = EnemyExplosion(hit.rect.center)
+            explosion_group.add(explosion)
+            all_sprites.add(explosion)
     enemies = Enemy_group.sprites()
     for enemy in enemies:
         if enemy.rect.right >= WIDTH:
@@ -88,10 +97,15 @@ while running:
                     alien.rect.y += 2
 
     screen.fill(BLACK)
+    score_object = sm_font.render(f'Score: {score}', True, WHITE)
+    score_rect = score_object.get_rect()
+    score_rect.center = 100, 20
+    screen.blit(score_object, score_rect)
     missile_group.draw(screen)
     Enemy_group.draw(screen)
     player_group.draw(screen)
     block_group.draw(screen)
+    explosion_group.draw(screen)
 
     # missile_group.update()
     all_sprites.update()
