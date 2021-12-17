@@ -1,119 +1,185 @@
 import pygame
 import random
 from settings import *
-from sprites import Player, Enemy, Missile, Blocks, EnemyExplosion
+from sprites import Player, Enemy, Missile, Blocks, EnemyExplosion, EnemyMissiles
 
 pygame.init()
 
-screen = pygame.display.set_mode(SIZE)
-pygame.display.set_caption('Animation Intro')
 
-clock = pygame.time.Clock()
-missile_previous_fire = pygame.time.get_ticks()
-running = True
-########################################################################################################################
-#################
-all_sprites = pygame.sprite.Group()
-#################
-# Player
-player_group = pygame.sprite.Group()  # create a sprite group
-player = Player('assets/player.png')  # create a player object
-player_group.add(player)  # add player object to group
-all_sprites.add(player)
-# sounds
-fire_sound = pygame.mixer.Sound('assets/shoot.wav')
-enemy_killed = pygame.mixer.Sound('assets/invaderkilled.wav')
-# Missile
-missile_group = pygame.sprite.Group()
-# Enemy
-Enemy_group = pygame.sprite.Group()
-off_set = 20
-v_scale = HEIGHT // 18
-h_scale = WIDTH // 12
-for row in range(1, 7):
-    for numb in range(11):
-        x_pos = numb * h_scale + off_set
-        y_pos = row * v_scale + off_set
-        enemy = Enemy('assets/red.png', x_pos, y_pos)
-        Enemy_group.add(enemy)
-enemy_direction = 1
-# blocks
-block_group = pygame.sprite.Group()
-start_values = [100, 225, 350, 475]
-for start in start_values:
-    for row_index, row in enumerate(LAYOUT):
-        for col_index, col in enumerate(row):
-            if col == 'X':
-                x_position = col_index*block_width + start
-                y_position = row_index*block_height + 600
-                block = Blocks(x_position, y_position, screen)
-                block_group.add(block)
-                all_sprites.add(block)
-# fonts
-score = 0
-# explosion group
-explosion_group = pygame.sprite.Group()
-########################################################################################################################
-# game loop
-while running:
-    # get all mouse, keyboard, controller events
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
+def start_screen():
+    screen = pygame.display.set_mode(SIZE)
+    pygame.display.set_caption('Space Invaders')
+    clock = pygame.time.Clock()
+    running = True
+    while running:
+        # get all mouse, keyboard, controller events
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                quit()
+
+            if event.type == pygame.KEYDOWN:
+                if event.key is pygame.K_RETURN:
+                    running = False
+
+        screen.fill(BLACK)
+        pygame.display.flip()
+
+        clock.tick(FPS)
+
+
+def game_over():
+    screen = pygame.display.set_mode(SIZE)
+    pygame.display.set_caption('Space Invaders')
+    clock = pygame.time.Clock()
+    running = True
+    while running:
+        # get all mouse, keyboard, controller events
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                quit()
+
+            if event.type == pygame.KEYDOWN:
+                if event.key is pygame.K_RETURN:
+                    running = False
+                if event.key is pygame.K_ESCAPE:
+                    quit()
+
+        screen.fill(BLACK)
+        pygame.display.flip()
+
+        clock.tick(FPS)
+
+
+def play():
+    screen = pygame.display.set_mode(SIZE)
+    pygame.display.set_caption('Animation Intro')
+
+    clock = pygame.time.Clock()
+    missile_previous_fire = pygame.time.get_ticks()
+    running = True
+    ########################################################################################################################
+    #################
+    all_sprites = pygame.sprite.Group()
+    #################
+    # Player
+    player_group = pygame.sprite.Group()  # create a sprite group
+    player = Player('assets/player.png')  # create a player object
+    player_group.add(player)  # add player object to group
+    all_sprites.add(player)
+    # sounds
+    fire_sound = pygame.mixer.Sound('assets/shoot.wav')
+    enemy_killed = pygame.mixer.Sound('assets/invaderkilled.wav')
+    # Missile
+    missile_group = pygame.sprite.Group()
+    # Enemy
+    Enemy_group = pygame.sprite.Group()
+    off_set = 20
+    v_scale = HEIGHT // 18
+    h_scale = WIDTH // 12
+    for row in range(1, 7):
+        for numb in range(11):
+            x_pos = numb * h_scale + off_set
+            y_pos = row * v_scale + off_set
+            enemy = Enemy('assets/red.png', x_pos, y_pos)
+            Enemy_group.add(enemy)
+    enemy_direction = 1
+    # blocks
+    block_group = pygame.sprite.Group()
+    start_values = [100, 225, 350, 475]
+    for start in start_values:
+        for row_index, row in enumerate(LAYOUT):
+            for col_index, col in enumerate(row):
+                if col == 'X':
+                    x_position = col_index * block_width + start
+                    y_position = row_index * block_height + 600
+                    block = Blocks(x_position, y_position, screen)
+                    block_group.add(block)
+                    all_sprites.add(block)
+    # fonts
+    score = 0
+    # explosion group
+    explosion_group = pygame.sprite.Group()
+    # bombs
+    bomb_group = pygame.sprite.Group()
+    ########################################################################################################################
+    # game loop
+    while running:
+        # get all mouse, keyboard, controller events
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                quit()
+
+            if event.type == pygame.KEYDOWN:
+                if event.key is pygame.K_SPACE:
+                    missile_current_fire = pygame.time.get_ticks()
+                    if missile_current_fire - missile_previous_fire > MISSILE_DELAY:
+                        missile_previous_fire = missile_current_fire
+                        missile = Missile(player.rect.centerx - missile_width // 2, player.rect.top)
+                        missile_group.add(missile)
+                        all_sprites.add(missile)
+                        fire_sound.play()
+
+        # print(all_sprites)
+        enemy_kills = pygame.sprite.groupcollide(missile_group, Enemy_group, True, True)
+        player_kills = pygame.sprite.groupcollide(player_group, Enemy_group, True, True)
+        enemy_blocks = pygame.sprite.groupcollide(Enemy_group, block_group, False, True)
+        missile_blocks = pygame.sprite.groupcollide(missile_group, block_group, True, True)
+        enemy_missile_blocks = pygame.sprite.groupcollide(bomb_group, block_group, True, True)
+        enemy_missile_player = pygame.sprite.groupcollide(bomb_group, player_group, True, True)
+        missile_missile = pygame.sprite.groupcollide(missile_group, bomb_group, True, True)
+        if enemy_kills:
+            enemy_killed.play()
+            score += 1
+            for hit in enemy_kills:
+                explosion = EnemyExplosion(hit.rect.center)
+                explosion_group.add(explosion)
+                all_sprites.add(explosion)
+        if player_kills:
             running = False
+        if enemy_missile_player:
+            running = False
+        enemies = Enemy_group.sprites()
+        for enemy in enemies:
+            chance = random.randint(0, 1000)
+            if chance == 10:
+                enemy_missile = EnemyMissiles(enemy.rect.centerx, enemy.rect.centery, screen)
+                bomb_group.add(enemy_missile)
+                all_sprites.add(enemy_missile)
+            if enemy.rect.right >= WIDTH:
+                enemy_direction = -1
+                if enemies:
+                    for alien in enemies:
+                        alien.rect.y += 2
+            elif enemy.rect.x <= 0:
+                enemy_direction = 1
+                if enemies:
+                    for alien in enemies:
+                        alien.rect.y += 2
 
-        if event.type == pygame.KEYDOWN:
-            if event.key is pygame.K_SPACE:
-                missile_current_fire = pygame.time.get_ticks()
-                if missile_current_fire - missile_previous_fire > MISSILE_DELAY:
-                    missile_previous_fire = missile_current_fire
-                    missile = Missile(player.rect.centerx - missile_width // 2, player.rect.top)
-                    missile_group.add(missile)
-                    all_sprites.add(missile)
-                    fire_sound.play()
+        screen.fill(BLACK)
+        score_object = sm_font.render(f'Score: {score}', True, WHITE)
+        score_rect = score_object.get_rect()
+        score_rect.center = 100, 20
+        screen.blit(score_object, score_rect)
+        missile_group.draw(screen)
+        Enemy_group.draw(screen)
+        player_group.draw(screen)
+        block_group.draw(screen)
+        bomb_group.draw(screen)
+        explosion_group.draw(screen)
 
-    # print(all_sprites)
-    enemy_kills = pygame.sprite.groupcollide(missile_group, Enemy_group, True, True)
-    player_kills = pygame.sprite.groupcollide(player_group, Enemy_group, True, True)
-    enemy_blocks = pygame.sprite.groupcollide(Enemy_group, block_group, False, True)
-    missile_blocks = pygame.sprite.groupcollide(missile_group, block_group, True, True)
-    if enemy_kills:
-        enemy_killed.play()
-        score += 1
-        for hit in enemy_kills:
-            explosion = EnemyExplosion(hit.rect.center)
-            explosion_group.add(explosion)
-            all_sprites.add(explosion)
-    enemies = Enemy_group.sprites()
-    for enemy in enemies:
-        if enemy.rect.right >= WIDTH:
-            enemy_direction = -1
-            if enemies:
-                for alien in enemies:
-                    alien.rect.y += 2
-        elif enemy.rect.x <= 0:
-            enemy_direction = 1
-            if enemies:
-                for alien in enemies:
-                    alien.rect.y += 2
+        # missile_group.update()
+        all_sprites.update()
+        Enemy_group.update(enemy_direction)
+        # player_group.update()
+        pygame.display.flip()
 
-    screen.fill(BLACK)
-    score_object = sm_font.render(f'Score: {score}', True, WHITE)
-    score_rect = score_object.get_rect()
-    score_rect.center = 100, 20
-    screen.blit(score_object, score_rect)
-    missile_group.draw(screen)
-    Enemy_group.draw(screen)
-    player_group.draw(screen)
-    block_group.draw(screen)
-    explosion_group.draw(screen)
+        clock.tick(FPS)
 
-    # missile_group.update()
-    all_sprites.update()
-    Enemy_group.update(enemy_direction)
-    # player_group.update()
-    pygame.display.flip()
 
-    clock.tick(FPS)
-
+start_screen()
+while True:
+    play()
+    game_over()
 # outside of game loop
 pygame.quit()
