@@ -22,6 +22,14 @@ def start_screen():
                     running = False
 
         screen.fill(BLACK)
+        title = sm_font.render(f'Welcome to Space invaders', True, WHITE)
+        title_rect = title.get_rect()
+        title_rect.center = 300, 20
+        screen.blit(title, title_rect)
+        start = sm_font.render(f'Press Enter to start', True, WHITE)
+        start_rect = start.get_rect()
+        start_rect.center = 300, 100
+        screen.blit(start, start_rect)
         pygame.display.flip()
 
         clock.tick(FPS)
@@ -45,6 +53,18 @@ def game_over():
                     quit()
 
         screen.fill(BLACK)
+        game_done = sm_font.render(f'Game Over', True, WHITE)
+        game_rect = game_done.get_rect()
+        game_rect.center = 300, 20
+        screen.blit(game_done, game_rect)
+        exit_game = sm_font.render(f'Press Escape to Exit', True, WHITE)
+        exit_rect = exit_game.get_rect()
+        exit_rect.center = 300, 100
+        screen.blit(exit_game, exit_rect)
+        restart_game = sm_font.render(f'Press Enter to Restart', True, WHITE)
+        restart_rect = restart_game.get_rect()
+        restart_rect.center = 300, 180
+        screen.blit(restart_game, restart_rect)
         pygame.display.flip()
 
         clock.tick(FPS)
@@ -129,8 +149,8 @@ def play():
         missile_missile = pygame.sprite.groupcollide(missile_group, bomb_group, True, True)
         if enemy_kills:
             enemy_killed.play()
-            score += 1
             for hit in enemy_kills:
+                score += 1
                 explosion = EnemyExplosion(hit.rect.center)
                 explosion_group.add(explosion)
                 all_sprites.add(explosion)
@@ -141,7 +161,7 @@ def play():
         enemies = Enemy_group.sprites()
         for enemy in enemies:
             chance = random.randint(0, 1000)
-            if chance == 10:
+            if chance == 10 or chance == 1:
                 enemy_missile = EnemyMissiles(enemy.rect.centerx, enemy.rect.centery, screen)
                 bomb_group.add(enemy_missile)
                 all_sprites.add(enemy_missile)

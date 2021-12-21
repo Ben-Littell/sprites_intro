@@ -21,7 +21,7 @@ class Player(pygame.sprite.Sprite):
         else:
             self.change_x = 0
         if self.rect.x >= WIDTH:
-            self.rect.x = -10
+            self.rect.x = -30
         if self.rect.x <= -self.rect.width:
             self.rect.x = WIDTH
 
