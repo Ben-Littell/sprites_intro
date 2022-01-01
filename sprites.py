@@ -105,3 +105,18 @@ class EnemyExplosion(pygame.sprite.Sprite):
             self.image = explosion_list[self.frame]
             self.rect = self.image.get_rect()
             self.rect.center = self.kill_center
+
+
+class SpaceShip(pygame.sprite.Sprite):
+    def __init__(self, image_path):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load(image_path)
+        self.rect = self.image.get_rect()
+        self.rect.x = 650
+        self.rect.y = 40
+        self.velocity = -3
+
+    def update(self):
+        self.rect.x += self.velocity
+        if self.rect.right <= 0 - self.rect.width:
+            self.kill()

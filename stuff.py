@@ -1,7 +1,7 @@
 import pygame
 import random
 from settings import *
-from sprites import Player, Enemy, Missile, Blocks, EnemyExplosion, EnemyMissiles
+from sprites import Player, Enemy, Missile, Blocks, EnemyExplosion, EnemyMissiles, SpaceShip
 
 pygame.init()
 
@@ -49,7 +49,7 @@ def game_over():
             if event.type == pygame.KEYDOWN:
                 if event.key is pygame.K_RETURN:
                     running = False
-                if event.key is pygame.K_ESCAPE:
+                if event.key is pygame.K_q:
                     quit()
 
         screen.fill(BLACK)
@@ -57,7 +57,7 @@ def game_over():
         game_rect = game_done.get_rect()
         game_rect.center = 300, 20
         screen.blit(game_done, game_rect)
-        exit_game = sm_font.render(f'Press Escape to Exit', True, WHITE)
+        exit_game = sm_font.render(f'Press Q to Exit', True, WHITE)
         exit_rect = exit_game.get_rect()
         exit_rect.center = 300, 100
         screen.blit(exit_game, exit_rect)
@@ -92,6 +92,7 @@ def play():
     # Missile
     missile_group = pygame.sprite.Group()
     # Enemy
+    rounds_counter = 0
     Enemy_group = pygame.sprite.Group()
     off_set = 20
     v_scale = HEIGHT // 18
@@ -117,10 +118,15 @@ def play():
                     all_sprites.add(block)
     # fonts
     score = 0
+    player_lives = 2
     # explosion group
     explosion_group = pygame.sprite.Group()
     # bombs
     bomb_group = pygame.sprite.Group()
+    # Space Ship
+    ship_delay = 15000
+    ship_group = pygame.sprite.Group()
+
     ########################################################################################################################
     # game loop
     while running:
@@ -140,13 +146,26 @@ def play():
                         fire_sound.play()
 
         # print(all_sprites)
+        if not Enemy_group:
+            running = False
+        ship_ticks = pygame.time.get_ticks()
+        if ship_ticks >= ship_delay:
+            ship = SpaceShip('assets/ufo.png')
+            ship_group.add(ship)
+            ship_delay += ship_ticks
         enemy_kills = pygame.sprite.groupcollide(missile_group, Enemy_group, True, True)
         player_kills = pygame.sprite.groupcollide(player_group, Enemy_group, True, True)
         enemy_blocks = pygame.sprite.groupcollide(Enemy_group, block_group, False, True)
         missile_blocks = pygame.sprite.groupcollide(missile_group, block_group, True, True)
         enemy_missile_blocks = pygame.sprite.groupcollide(bomb_group, block_group, True, True)
-        enemy_missile_player = pygame.sprite.groupcollide(bomb_group, player_group, True, True)
+        enemy_missile_player = pygame.sprite.groupcollide(bomb_group, player_group, True, False)
         missile_missile = pygame.sprite.groupcollide(missile_group, bomb_group, True, True)
+        ship_missile = pygame.sprite.groupcollide(missile_group, ship_group, True, True)
+        if ship_missile:
+            score += 10
+            explosion = EnemyExplosion(ship.rect.center)
+            explosion_group.add(explosion)
+            all_sprites.add(explosion)
         if enemy_kills:
             enemy_killed.play()
             for hit in enemy_kills:
@@ -157,7 +176,12 @@ def play():
         if player_kills:
             running = False
         if enemy_missile_player:
-            running = False
+            explosion = EnemyExplosion(player.rect.center)
+            explosion_group.add(explosion)
+            all_sprites.add(explosion)
+            player_lives -= 1
+            if player_lives < 0:
+                running = False
         enemies = Enemy_group.sprites()
         for enemy in enemies:
             chance = random.randint(0, 1000)
@@ -175,24 +199,36 @@ def play():
                 if enemies:
                     for alien in enemies:
                         alien.rect.y += 2
+        for ship in ship_group:
+            chance2 = random.randint(0, 50)
+            if chance2 == 10:
+                enemy_missile = EnemyMissiles(ship.rect.centerx, ship.rect.centery, screen)
+                bomb_group.add(enemy_missile)
+                all_sprites.add(enemy_missile)
 
         screen.fill(BLACK)
         score_object = sm_font.render(f'Score: {score}', True, WHITE)
         score_rect = score_object.get_rect()
         score_rect.center = 100, 20
         screen.blit(score_object, score_rect)
+        lives_object = sm_font.render(f'Lives: {player_lives}', True, WHITE)
+        lives_rect = lives_object.get_rect()
+        lives_rect.center = 500, 20
+        screen.blit(lives_object, lives_rect)
         missile_group.draw(screen)
         Enemy_group.draw(screen)
         player_group.draw(screen)
         block_group.draw(screen)
         bomb_group.draw(screen)
         explosion_group.draw(screen)
+        ship_group.draw(screen)
 
         # missile_group.update()
         all_sprites.update()
         Enemy_group.update(enemy_direction)
         # player_group.update()
         pygame.display.flip()
+        ship_group.update()
 
         clock.tick(FPS)
 
