@@ -76,6 +76,7 @@ def play():
 
     clock = pygame.time.Clock()
     missile_previous_fire = pygame.time.get_ticks()
+    ship_previous = pygame.time.get_ticks()
     running = True
     ########################################################################################################################
     #################
@@ -124,7 +125,7 @@ def play():
     # bombs
     bomb_group = pygame.sprite.Group()
     # Space Ship
-    ship_delay = 15000
+    ship_delay = 10000
     ship_group = pygame.sprite.Group()
 
     ########################################################################################################################
@@ -149,10 +150,10 @@ def play():
         if not Enemy_group:
             running = False
         ship_ticks = pygame.time.get_ticks()
-        if ship_ticks >= ship_delay:
+        if ship_ticks - ship_previous >= ship_delay:
+            ship_previous = ship_ticks
             ship = SpaceShip('assets/ufo.png')
             ship_group.add(ship)
-            ship_delay += ship_ticks
         enemy_kills = pygame.sprite.groupcollide(missile_group, Enemy_group, True, True)
         player_kills = pygame.sprite.groupcollide(player_group, Enemy_group, True, True)
         enemy_blocks = pygame.sprite.groupcollide(Enemy_group, block_group, False, True)
