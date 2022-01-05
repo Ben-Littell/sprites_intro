@@ -28,12 +28,13 @@ class Player(pygame.sprite.Sprite):
 
 class Enemy(pygame.sprite.Sprite):
 
-    def __init__(self, image_path, x, y):
+    def __init__(self, image_path, x, y, points):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load(image_path)
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
+        self.points = points
 
     def update(self, x_velo):
         self.rect.x += x_velo

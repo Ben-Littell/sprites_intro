@@ -65,6 +65,12 @@ def game_over():
         restart_rect = restart_game.get_rect()
         restart_rect.center = 300, 180
         screen.blit(restart_game, restart_rect)
+        with open('score.txt') as file:
+            line = file.readline()
+            score_game = sm_font.render(f'High Score: {line}', True, WHITE)
+            score_rect = score_game.get_rect()
+            score_rect.center = 300, 260
+            screen.blit(score_game, score_rect)
         pygame.display.flip()
 
         clock.tick(FPS)
@@ -94,7 +100,10 @@ def play():
     missile_group = pygame.sprite.Group()
     # Enemy
     rounds_counter = 0
-    Enemy_group = pygame.sprite.Group()
+    Enemy_group_m = pygame.sprite.Group()
+    Enemy_group_g = pygame.sprite.Group()
+    Enemy_group_r = pygame.sprite.Group()
+    Enemy_group_y = pygame.sprite.Group()
     off_set = 20
     v_scale = HEIGHT // 18
     h_scale = WIDTH // 12
@@ -102,8 +111,21 @@ def play():
         for numb in range(11):
             x_pos = numb * h_scale + off_set
             y_pos = row * v_scale + off_set
-            enemy = Enemy('assets/red.png', x_pos, y_pos)
-            Enemy_group.add(enemy)
+            if row <= 2:
+                point_val = 10
+                enemy = Enemy('assets/green.png', x_pos, y_pos, point_val)
+                Enemy_group_g.add(enemy)
+                Enemy_group_m.add(enemy)
+            elif row <= 4:
+                point_val = 5
+                enemy = Enemy('assets/yellow.png', x_pos, y_pos, point_val)
+                Enemy_group_y.add(enemy)
+                Enemy_group_m.add(enemy)
+            else:
+                point_val = 1
+                enemy = Enemy('assets/red.png', x_pos, y_pos, point_val)
+                Enemy_group_r.add(enemy)
+                Enemy_group_m.add(enemy)
     enemy_direction = 1
     # blocks
     block_group = pygame.sprite.Group()
@@ -147,43 +169,64 @@ def play():
                         fire_sound.play()
 
         # print(all_sprites)
-        if not Enemy_group:
+        if not Enemy_group_g and not Enemy_group_r and not Enemy_group_y:
             running = False
         ship_ticks = pygame.time.get_ticks()
         if ship_ticks - ship_previous >= ship_delay:
             ship_previous = ship_ticks
             ship = SpaceShip('assets/ufo.png')
             ship_group.add(ship)
-        enemy_kills = pygame.sprite.groupcollide(missile_group, Enemy_group, True, True)
-        player_kills = pygame.sprite.groupcollide(player_group, Enemy_group, True, True)
-        enemy_blocks = pygame.sprite.groupcollide(Enemy_group, block_group, False, True)
+        enemy_kills_g = pygame.sprite.groupcollide(Enemy_group_g, missile_group, True, True)
+        enemy_kills_y = pygame.sprite.groupcollide(Enemy_group_y, missile_group, True, True)
+        enemy_kills_r = pygame.sprite.groupcollide(Enemy_group_r, missile_group, True, True)
+        player_kills = pygame.sprite.groupcollide(player_group, Enemy_group_m, True, True)
+        enemy_blocks = pygame.sprite.groupcollide(Enemy_group_m, block_group, False, True)
         missile_blocks = pygame.sprite.groupcollide(missile_group, block_group, True, True)
         enemy_missile_blocks = pygame.sprite.groupcollide(bomb_group, block_group, True, True)
         enemy_missile_player = pygame.sprite.groupcollide(bomb_group, player_group, True, False)
         missile_missile = pygame.sprite.groupcollide(missile_group, bomb_group, True, True)
         ship_missile = pygame.sprite.groupcollide(missile_group, ship_group, True, True)
         if ship_missile:
-            score += 10
+            enemy_killed.play()
+            score += 20
             explosion = EnemyExplosion(ship.rect.center)
             explosion_group.add(explosion)
             all_sprites.add(explosion)
-        if enemy_kills:
+        if enemy_kills_r:
             enemy_killed.play()
-            for hit in enemy_kills:
+            for hit in enemy_kills_r:
                 score += 1
+                explosion = EnemyExplosion(hit.rect.center)
+                explosion_group.add(explosion)
+                all_sprites.add(explosion)
+        if enemy_kills_y:
+            enemy_killed.play()
+            for hit in enemy_kills_y:
+                score += 5
+                explosion = EnemyExplosion(hit.rect.center)
+                explosion_group.add(explosion)
+                all_sprites.add(explosion)
+        if enemy_kills_g:
+            enemy_killed.play()
+            for hit in enemy_kills_g:
+                score += 10
                 explosion = EnemyExplosion(hit.rect.center)
                 explosion_group.add(explosion)
                 all_sprites.add(explosion)
         if player_kills:
             running = False
         if enemy_missile_player:
+            enemy_killed.play()
             explosion = EnemyExplosion(player.rect.center)
             explosion_group.add(explosion)
             all_sprites.add(explosion)
             player_lives -= 1
             if player_lives < 0:
                 running = False
-        enemies = Enemy_group.sprites()
+        enemies = Enemy_group_m.sprites()
+        for enemy in enemies:
+            if enemy.rect.top > HEIGHT:
+                running = False
         for enemy in enemies:
             chance = random.randint(0, 1000)
             if chance == 10 or chance == 1:
@@ -191,12 +234,18 @@ def play():
                 bomb_group.add(enemy_missile)
                 all_sprites.add(enemy_missile)
             if enemy.rect.right >= WIDTH:
-                enemy_direction = -1
+                if enemy.rect.y <= 500:
+                    enemy_direction = -1
+                else:
+                    enemy_direction = -2
                 if enemies:
                     for alien in enemies:
                         alien.rect.y += 2
             elif enemy.rect.x <= 0:
-                enemy_direction = 1
+                if enemy.rect.y <= 500:
+                    enemy_direction = 1
+                else:
+                    enemy_direction = 2
                 if enemies:
                     for alien in enemies:
                         alien.rect.y += 2
@@ -217,7 +266,7 @@ def play():
         lives_rect.center = 500, 20
         screen.blit(lives_object, lives_rect)
         missile_group.draw(screen)
-        Enemy_group.draw(screen)
+        Enemy_group_m.draw(screen)
         player_group.draw(screen)
         block_group.draw(screen)
         bomb_group.draw(screen)
@@ -226,12 +275,17 @@ def play():
 
         # missile_group.update()
         all_sprites.update()
-        Enemy_group.update(enemy_direction)
+        Enemy_group_m.update(enemy_direction)
         # player_group.update()
         pygame.display.flip()
         ship_group.update()
 
         clock.tick(FPS)
+    with open('score.txt', 'r') as file:
+        line = file.readline()
+        if int(line) < score:
+            with open('score.txt', 'w') as file2:
+                file2.write(str(score))
 
 
 start_screen()
